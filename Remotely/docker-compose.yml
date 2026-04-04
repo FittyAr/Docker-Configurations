@@ -1,0 +1,18 @@
+services:
+  remotely:
+    image: docker.io/imranmoseley/remotely:latest
+    container_name: remotely-server
+    restart: always
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+    ports:
+      - "5000:5000"   # Panel Web (HTTP)
+      - "5001:5001"   # Tráfico de Agentes (SignalR)
+    volumes:
+      - ./data:/app/wwwroot/AppData
+    networks:
+      - remotely-network
+
+networks:
+  remotely-network:
+    driver: bridge

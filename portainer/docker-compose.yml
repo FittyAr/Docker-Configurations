@@ -1,0 +1,23 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    user: "0:0"
+      # Eliminamos el flag inexistente y dejamos solo el hash de "deck" (usuario admin)
+    command:
+      # - --admin-password='$$2y$$05$$8zU79P02I6j8iV.U86aGDe4A6G0gY.mZ5VlG3Jp6N0WvV/mX1m9uG'
+      --admin-password-file /run/secrets/portainer_password
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+      - ./portainer_password:/run/secrets/portainer_password:ro
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+
+volumes:
+  portainer_data:

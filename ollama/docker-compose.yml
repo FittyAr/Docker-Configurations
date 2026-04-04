@@ -6,13 +6,6 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     restart: unless-stopped
 
   ollama-pull:
@@ -21,25 +14,18 @@ services:
     depends_on:
       - ollama
     environment:
-      - OLLAMA_HOST=http://ollama:11434
-    entrypoint: >
-      sh -c "echo 'Esperando a que Ollama inicie...' &&
-             sleep 10 &&
-             echo 'Descargando phi3...' &&
-             ollama pull phi3 &&
-             echo 'Descargando mistral...' &&
-             ollama pull mistral &&
-             echo 'Descargando gemma2:9b...' &&
-             ollama pull gemma2:9b &&
-             echo 'Descargando ministral-3:3b...' &&
-             ollama pull ministral-3:3b &&
-             echo 'Descargando codegemma...' &&
-             ollama pull codegemma &&
-             echo 'Descargando qwen2.5-coder:7b...' &&
-             ollama pull qwen2.5-coder:7b &&
-             echo 'Descargando deepseek-r1:8b...' &&
-             ollama pull deepseek-r1:8b &&
-             echo 'Todos los modelos listos!'"
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - |
+        echo "Esperando a que el servidor Ollama responda en el puerto 11434..."
+        while ! (echo > /dev/tcp/ollama/11434) >/dev/null 2>&1; do
+          sleep 3
+        done
+        echo "¡Conexión establecida! Iniciando descargas..."
+        ollama pull gemma4:e2b
+        echo "Descargas finalizadas."
     restart: "no"
 
   open-webui:
@@ -57,4 +43,6 @@ services:
 
 volumes:
   ollama_data:
+    name: ollama_data
   openwebui_data:
+    name: openwebui_data
