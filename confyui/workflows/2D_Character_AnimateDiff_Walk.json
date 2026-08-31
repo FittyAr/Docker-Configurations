@@ -1,0 +1,778 @@
+{
+  "last_node_id": 14,
+  "last_link_id": 17,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        60,
+        100
+      ],
+      "size": [
+        310,
+        100
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2,
+            3
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            4,
+            5
+          ],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "DreamShaper_8_pruned.safetensors"
+      ],
+      "title": "1. Checkpoint Loader (DreamShaper 8)"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        60,
+        260
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "character_side_view.png",
+        "image"
+      ],
+      "title": "2. Input Character (2D Side View)"
+    },
+    {
+      "id": 3,
+      "type": "VAEEncode",
+      "pos": [
+        410,
+        260
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 6
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            7
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": [],
+      "title": "3. VAE Encode Character"
+    },
+    {
+      "id": 4,
+      "type": "RepeatLatentBatch",
+      "pos": [
+        410,
+        370
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            8
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RepeatLatentBatch"
+      },
+      "widgets_values": [
+        16
+      ],
+      "title": "4. Repeat Latent (16 Frames)"
+    },
+    {
+      "id": 5,
+      "type": "ADE_LoadAnimateDiffModel",
+      "pos": [
+        60,
+        620
+      ],
+      "size": [
+        310,
+        80
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MOTION_MODEL",
+          "type": "MOTION_MODEL_ADE",
+          "links": [
+            9
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADE_LoadAnimateDiffModel"
+      },
+      "widgets_values": [
+        "mm_sd_v15_v2.ckpt"
+      ],
+      "title": "5. Load AnimateDiff Model (v2)"
+    },
+    {
+      "id": 6,
+      "type": "ADE_ApplyAnimateDiffModelSimple",
+      "pos": [
+        410,
+        620
+      ],
+      "size": [
+        250,
+        60
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "motion_model",
+          "type": "MOTION_MODEL_ADE",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "M_MODELS",
+          "type": "M_MODELS",
+          "links": [
+            10
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADE_ApplyAnimateDiffModelSimple"
+      },
+      "widgets_values": [],
+      "title": "6. Apply AnimateDiff Model"
+    },
+    {
+      "id": 7,
+      "type": "ADE_LoopedUniformContextOptions",
+      "pos": [
+        410,
+        720
+      ],
+      "size": [
+        280,
+        140
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONTEXT_OPTIONS",
+          "type": "CONTEXT_OPTIONS",
+          "links": [
+            11
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADE_LoopedUniformContextOptions"
+      },
+      "widgets_values": [
+        16,
+        1,
+        4,
+        true
+      ],
+      "title": "7. Looped Uniform Context Options"
+    },
+    {
+      "id": 8,
+      "type": "ADE_UseEvolvedSampling",
+      "pos": [
+        720,
+        620
+      ],
+      "size": [
+        260,
+        100
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "m_models",
+          "type": "M_MODELS",
+          "link": 10
+        },
+        {
+          "name": "context_options",
+          "type": "CONTEXT_OPTIONS",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            12
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADE_UseEvolvedSampling"
+      },
+      "widgets_values": [
+        "sqrt_linear (AnimateDiff)"
+      ],
+      "title": "8. AnimateDiff Evolved Sampling"
+    },
+    {
+      "id": 9,
+      "type": "CLIPTextEncode",
+      "pos": [
+        680,
+        100
+      ],
+      "size": [
+        400,
+        160
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            13
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d character game sprite, full body lateral profile view, zombie soccer fan hooligan, soccer ball texture on bald head, facial scar, light blue and white striped soccer jersey, big yellow drum strapped to belly, holding stick, ripped cargo shorts, sneakers, side view walking cycle animation, full body walking in place, comic cel shaded style, bold ink outlines, flat isolated plain white background"
+      ],
+      "title": "9. Positive Prompt (Walk Cycle)"
+    },
+    {
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [
+        680,
+        300
+      ],
+      "size": [
+        400,
+        160
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            14
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "blurry, low quality, photorealistic, 3d render, realistic photograph, static still, no movement, camera panning, camera zoom, isometric, front view, noisy background, text, watermark, deformed anatomy"
+      ],
+      "title": "10. Negative Prompt"
+    },
+    {
+      "id": 11,
+      "type": "KSampler",
+      "pos": [
+        1120,
+        100
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 12
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 13
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 14
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            15
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        777123,
+        "randomize",
+        25,
+        7.5,
+        "euler_ancestral",
+        "karras",
+        0.65
+      ],
+      "title": "11. KSampler (16 Frames Motion Diffusion)"
+    },
+    {
+      "id": 12,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        100
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 15
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            16,
+            17
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "12. VAE Decode Frames"
+    },
+    {
+      "id": 13,
+      "type": "SaveImage",
+      "pos": [
+        1680,
+        100
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 16
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "animatediff_walk/frame"
+      ],
+      "title": "13. Save Output Frames (PNGs)"
+    },
+    {
+      "id": 14,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        1680,
+        400
+      ],
+      "size": [
+        320,
+        340
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": [
+        8.0,
+        0,
+        "animatediff_walk_loop",
+        "image/gif",
+        false,
+        true
+      ],
+      "title": "14. VHS Combine (Looping GIF)"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      8,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      1,
+      1,
+      9,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      1,
+      1,
+      10,
+      0,
+      "CLIP"
+    ],
+    [
+      4,
+      1,
+      2,
+      3,
+      1,
+      "VAE"
+    ],
+    [
+      5,
+      1,
+      2,
+      12,
+      1,
+      "VAE"
+    ],
+    [
+      6,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      7,
+      3,
+      0,
+      4,
+      0,
+      "LATENT"
+    ],
+    [
+      8,
+      4,
+      0,
+      11,
+      3,
+      "LATENT"
+    ],
+    [
+      9,
+      5,
+      0,
+      6,
+      0,
+      "MOTION_MODEL_ADE"
+    ],
+    [
+      10,
+      6,
+      0,
+      8,
+      1,
+      "M_MODELS"
+    ],
+    [
+      11,
+      7,
+      0,
+      8,
+      2,
+      "CONTEXT_OPTIONS"
+    ],
+    [
+      12,
+      8,
+      0,
+      11,
+      0,
+      "MODEL"
+    ],
+    [
+      13,
+      9,
+      0,
+      11,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      10,
+      0,
+      11,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      15,
+      11,
+      0,
+      12,
+      0,
+      "LATENT"
+    ],
+    [
+      16,
+      12,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      17,
+      12,
+      0,
+      14,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "1. Character Setup & Latent Batching",
+      "bounding": [
+        40,
+        40,
+        600,
+        550
+      ],
+      "color": "#3f789e",
+      "font_size": 24
+    },
+    {
+      "title": "2. AnimateDiff Motion Module & Temporal Context",
+      "bounding": [
+        40,
+        560,
+        960,
+        340
+      ],
+      "color": "#8c447a",
+      "font_size": 24
+    },
+    {
+      "title": "3. Diffusion Sampling & Video Assembly",
+      "bounding": [
+        1080,
+        40,
+        950,
+        750
+      ],
+      "color": "#29693b",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

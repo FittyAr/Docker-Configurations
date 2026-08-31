@@ -1,0 +1,84 @@
+services:
+  # Qwen 3.6 35B A3B MTP IQ4 (MoE Model)
+  # Optimized for RTX 3070 8GB VRAM (partial offloading to GPU: -ngl 16)
+  qwen-35b:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llama-qwen-35b
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    command: >
+      --model /models/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf
+      --mmproj /models/Qwen3.6-35B-A3B-MTP-GGUF/mmproj-F16.gguf
+      --host 0.0.0.0
+      --port 8080
+      --ctx-size 16384
+      --n-gpu-layers 16
+      --gpu-layers-draft 999
+      --flash-attn on
+      --cache-type-k q8_0
+      --cache-type-v q8_0
+      --spec-draft-type-k q8_0
+      --spec-draft-type-v q8_0
+      --spec-type draft-mtp
+      --spec-draft-n-max 2
+      --kv-unified
+      --cache-reuse 256
+      --slot-prompt-similarity 0.90
+      --ubatch-size 512
+      --reasoning on
+      --reasoning-budget 1536
+      --reasoning-budget-message "Reasoning budget reached. Provide the final answer now."
+      --fit off
+      --sleep-idle-seconds 600
+
+  # Qwen 3.5 9B MTP (Dense Model)
+  # Optimized for RTX 3070 8GB VRAM (full offloading to GPU: -ngl 99)
+  qwen-9b:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llama-qwen-9b
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./models:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    command: >
+      --model /models/Qwen3.5-9B-MTP-GGUF/Qwen3.5-9B-UD-Q4_K_XL.gguf
+      --mmproj /models/Qwen3.5-9B-MTP-GGUF/mmproj-F16.gguf
+      --host 0.0.0.0
+      --port 8080
+      --ctx-size 16384
+      --n-gpu-layers 99
+      --gpu-layers-draft 999
+      --flash-attn on
+      --cache-type-k q8_0
+      --cache-type-v q8_0
+      --spec-draft-type-k q8_0
+      --spec-draft-type-v q8_0
+      --spec-type draft-mtp
+      --spec-draft-n-max 2
+      --kv-unified
+      --cache-reuse 256
+      --slot-prompt-similarity 0.90
+      --ubatch-size 512
+      --reasoning on
+      --reasoning-budget 1536
+      --reasoning-budget-message "Reasoning budget reached. Provide the final answer now."
+      --fit off
+      --sleep-idle-seconds 600

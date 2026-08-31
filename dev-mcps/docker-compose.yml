@@ -1,0 +1,291 @@
+# =============================================================================
+# Docker Compose — Stack de servidores MCP (Model Context Protocol)
+# =============================================================================
+# Imágenes del Docker MCP Catalog (https://hub.docker.com/mcp) y extras locales.
+#
+# Catálogo oficial (referencia):
+#   catalog://mcp/docker-mcp-catalog/<nombre>
+# Imágenes en Docker Hub namespace mcp/* (empaquetadas por Docker Inc.):
+#   mcp/playwright, mcp/fetch, mcp/git
+#
+# Uso:
+#   1. Copia .env.example → .env y ajusta rutas/volúmenes.
+#   2. docker compose pull
+#   3. docker compose up -d
+#
+# Notas de transporte:
+#   - La mayoría de servidores del catálogo usan stdio (el cliente lanza
+#     `docker run -i` o se conecta vía Docker MCP Gateway / MCP Toolkit).
+#   - chrome-devtools-mcp expone SSE en el puerto 8000 (listo para clientes HTTP).
+#   - Astro Docs es un MCP REMOTO (sin imagen de contenedor en el catálogo).
+#
+# Compose Spec actual: no se usa la clave obsoleta `version:`.
+# =============================================================================
+
+name: dev-mcps
+
+# -----------------------------------------------------------------------------
+# Variables (definir en .env o exportar en el shell)
+# -----------------------------------------------------------------------------
+# GIT_REPO_PATH       Ruta local a repositorios Git a montar (obligatorio para Git)
+# PLAYWRIGHT_OUTPUT   Directorio host para capturas/traces de Playwright
+# DOTNET_PROJECTS     Ruta local a proyectos .NET a explorar
+# -----------------------------------------------------------------------------
+
+services:
+
+  # ===========================================================================
+  # Playwright (by microsoft)
+  # Catálogo: catalog://mcp/docker-mcp-catalog/playwright
+  # Imagen:   mcp/playwright
+  # Repo:     https://github.com/microsoft/playwright-mcp
+  # ===========================================================================
+  playwright:
+    image: mcp/playwright:latest
+    container_name: mcp-playwright
+    restart: unless-stopped
+    # Chromium en contenedor: más memoria compartida y IPC estable
+    shm_size: "2gb"
+    ipc: host
+    init: true
+    stdin_open: true
+    tty: true
+    environment:
+      # Directorio de salida de capturas/PDFs dentro del contenedor.
+      # Debe coincidir con el mount de volumes (ver abajo).
+      PLAYWRIGHT_MCP_OUTPUT_DIR: /mcp/output
+      # Opcional: directorio de perfil de navegador (cookies/sesión).
+      # PLAYWRIGHT_MCP_USER_DATA_DIR: /mcp/user-data
+    volumes:
+      # >>> MAPEAR VOLUMEN LOCAL: capturas, traces y archivos generados
+      #     Host (Windows ejemplo): D:/Docker/dev-mcps/data/playwright
+      #     Host (Linux/macOS):     ./data/playwright
+      - ${PLAYWRIGHT_OUTPUT:-./data/playwright}:/mcp/output
+      # >>> OPCIONAL: persistir sesión del navegador
+      # - ${PLAYWRIGHT_USER_DATA:-./data/playwright-user-data}:/mcp/user-data
+      # >>> OPCIONAL: subir archivos locales al navegador (browser_file_upload)
+      # - ${PLAYWRIGHT_UPLOADS:-./data/playwright-uploads}:/mcp/uploads:ro
+    networks:
+      - mcp-network
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - mcp.catalog=docker-mcp-catalog
+      - mcp.server=playwright
+      - mcp.author=microsoft
+      - mcp.transport=stdio
+
+  # ===========================================================================
+  # Fetch (Reference) (by modelcontextprotocol)
+  # Catálogo: catalog://mcp/docker-mcp-catalog/fetch
+  # Imagen:   mcp/fetch
+  # Repo:     https://github.com/modelcontextprotocol/servers (src/fetch)
+  # ===========================================================================
+  fetch:
+    image: mcp/fetch:latest
+    container_name: mcp-fetch
+    restart: unless-stopped
+    init: true
+    stdin_open: true
+    tty: true
+    # Sin volúmenes ni secretos: solo descarga URLs y devuelve markdown.
+    networks:
+      - mcp-network
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - mcp.catalog=docker-mcp-catalog
+      - mcp.server=fetch
+      - mcp.author=modelcontextprotocol
+      - mcp.transport=stdio
+
+  # ===========================================================================
+  # Astro Docs (by docker / withastro) — SERVIDOR REMOTO
+  # Catálogo: catalog://mcp/docker-mcp-catalog/astro-docs
+  # Tipo:     remote (streamable-http) — NO hay imagen mcp/* local
+  # URL:      https://mcp.docs.astro.build/mcp
+  # Repo:     https://github.com/withastro/docs-mcp
+  #
+  # Este servicio NO ejecuta un contenedor del catálogo. Sirve como documentación
+  # operativa y un healthcheck opcional contra el endpoint remoto, para que el
+  # stack "conozca" la dependencia y los clientes sepan la URL canónica.
+  #
+  # Configuración en el cliente MCP (ejemplo):
+  #   {
+  #     "mcpServers": {
+  #       "astro-docs": {
+  #         "url": "https://mcp.docs.astro.build/mcp",
+  #         "transport": "http"
+  #       }
+  #     }
+  #   }
+  # ===========================================================================
+  astro-docs:
+    image: curlimages/curl:8.12.1
+    container_name: mcp-astro-docs-remote
+    restart: unless-stopped
+    # Contenedor ligero que solo valida conectividad al MCP remoto de Astro.
+    # No es el servidor MCP en sí: el protocolo se habla directo al endpoint.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Astro Docs MCP es remoto: https://mcp.docs.astro.build/mcp"
+        echo "Configura tu cliente MCP con esa URL (no hay imagen local en el catálogo)."
+        while true; do
+          code=$$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+            -H "Accept: text/event-stream" \
+            "https://mcp.docs.astro.build/mcp" || echo "000")
+          echo "[astro-docs] remote endpoint HTTP $$code"
+          sleep 300
+        done
+    networks:
+      - mcp-network
+    labels:
+      - mcp.catalog=docker-mcp-catalog
+      - mcp.server=astro-docs
+      - mcp.author=docker
+      - mcp.transport=remote-http
+      - mcp.remote.url=https://mcp.docs.astro.build/mcp
+
+  # ===========================================================================
+  # Git (Reference) (by modelcontextprotocol) — REQUIERE CONFIGURACIÓN PREVIA
+  # Catálogo: catalog://mcp/docker-mcp-catalog/git
+  # Imagen:   mcp/git
+  # Repo:     https://github.com/modelcontextprotocol/servers (src/git)
+  #
+  # Config del catálogo: git.paths (rutas a las que el servidor puede acceder).
+  # Debes montar esas rutas host → contenedor con el MISMO path lógico o
+  # referenciar repo_path con la ruta DENTRO del contenedor.
+  # ===========================================================================
+  git:
+    image: mcp/git:latest
+    container_name: mcp-git
+    restart: unless-stopped
+    init: true
+    stdin_open: true
+    tty: true
+    environment:
+      # Ruta base de repositorios DENTRO del contenedor (documentación / scripts).
+      # Al invocar tools (git_status, git_log, …) usa repo_path bajo este mount.
+      GIT_WORKSPACE: /repos
+      # >>> OPCIONAL: identidad de commits si el agente hace git_commit
+      # GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME:-MCP Agent}
+      # GIT_AUTHOR_EMAIL: ${GIT_AUTHOR_EMAIL:-mcp-agent@localhost}
+      # GIT_COMMITTER_NAME: ${GIT_COMMITTER_NAME:-MCP Agent}
+      # GIT_COMMITTER_EMAIL: ${GIT_COMMITTER_EMAIL:-mcp-agent@localhost}
+      # >>> OPCIONAL: token para HTTPS remotes privados (no lo usa el server por defecto;
+      #     útil si añades git helpers o scripts de autenticación en el contenedor)
+      # GIT_TOKEN: ${GIT_TOKEN:-}
+      # GH_TOKEN: ${GIT_TOKEN:-}
+    volumes:
+      # >>> OBLIGATORIO: monta el/los repositorios locales que Git MCP puede tocar.
+      #     Ejemplo Windows:  GIT_REPO_PATH=D:/proyectos
+      #     Ejemplo Linux:    GIT_REPO_PATH=/home/usuario/proyectos
+      #     Dentro del contenedor: /repos/<nombre-del-repo>
+      #     tool repo_path ejemplo: /repos/mi-app
+      - ${GIT_REPO_PATH:?Define GIT_REPO_PATH en .env con la ruta a tus repos}:/repos
+      # >>> OPCIONAL: credenciales SSH de solo lectura para remotes git@...
+      #     Host: ~/.ssh  →  Contenedor: /root/.ssh (ajusta UID si hace falta)
+      # - ${GIT_SSH_DIR:-./data/git-ssh}:/root/.ssh:ro
+      # >>> OPCIONAL: gitconfig global (user.name / user.email / safe.directory)
+      # - ${GIT_CONFIG_FILE:-./data/gitconfig}:/root/.gitconfig:ro
+    networks:
+      - mcp-network
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - mcp.catalog=docker-mcp-catalog
+      - mcp.server=git
+      - mcp.author=modelcontextprotocol
+      - mcp.transport=stdio
+      - mcp.requires-configuration=true
+
+  # ===========================================================================
+  # .NET Types Explorer (by V0v1kkk)
+  # Catálogo: catalog://mcp/docker-mcp-catalog/dotnet-types-explorer
+  # Imagen:   vrogozhin/dotnet-types-explorer-mcp (publicada en Hub; listada en catálogo)
+  # Repo:     https://github.com/V0v1kkk/DotNetMetadataMcpServer
+  # ===========================================================================
+  dotnet-types-explorer:
+    image: vrogozhin/dotnet-types-explorer-mcp:latest
+    container_name: mcp-dotnet-types-explorer
+    restart: unless-stopped
+    init: true
+    stdin_open: true
+    tty: true
+    environment:
+      # Workspace de proyectos .NET montado (ver volumes).
+      # En las tools usa ProjectFileAbsolutePath bajo /workspace/...
+      DOTNET_WORKSPACE: /workspace
+      # >>> OPCIONAL: modo de resolución de ensamblados (BuildOutput | NuGetCache | Auto)
+      # AssemblyResolutionMode se configura en appsettings del contenedor si lo personalizas.
+    volumes:
+      # >>> OBLIGATORIO: proyectos .NET a explorar (csproj / solution tree)
+      #     Ejemplo: DOTNET_PROJECTS=D:/src/mis-proyectos-dotnet
+      #     tool path ejemplo: /workspace/MiApp/MiApp.csproj
+      - ${DOTNET_PROJECTS:?Define DOTNET_PROJECTS en .env}:/workspace
+      # >>> OPCIONAL: cache global de NuGet del host (acelera restore / NuGetCache mode)
+      # - ${NUGET_PACKAGES:-~/.nuget/packages}:/root/.nuget/packages
+    networks:
+      - mcp-network
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - mcp.catalog=docker-mcp-catalog
+      - mcp.server=dotnet-types-explorer
+      - mcp.author=V0v1kkk
+      - mcp.transport=stdio
+
+  # ===========================================================================
+  # Chrome DevTools MCP (local / chrome-devtools-mcp:latest)
+  # Imagen:   chrome-devtools-mcp:latest
+  # Build:    ../chrome-devtools-mcp (si la imagen no existe aún)
+  # Transporte: SSE en http://localhost:8000/sse
+  # ===========================================================================
+  chrome-devtools-mcp:
+    build:
+      context: ../chrome-devtools-mcp
+      dockerfile: Dockerfile
+    image: chrome-devtools-mcp:latest
+    container_name: chrome-devtools-mcp
+    restart: unless-stopped
+    ports:
+      # >>> Exponer SSE al host: clientes MCP con transport "sse" / "http"
+      - "${CHROME_DEVTOOLS_PORT:-8000}:8000"
+    shm_size: "2gb"
+    environment:
+      - CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS=true
+      - NODE_ENV=production
+      # >>> OPCIONAL: proxy corporativo / flags extra vía rebuild del Dockerfile
+    # volumes:
+    #   # >>> OPCIONAL: descargas o artefactos generados por DevTools
+    #   - ${CHROME_DEVTOOLS_DATA:-./data/chrome-devtools}:/data
+    stdin_open: true
+    tty: true
+    networks:
+      - mcp-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e 'const s=require(\"net\").connect(8000,\"127.0.0.1\",()=>{s.destroy();process.exit(0)});s.on(\"error\",()=>process.exit(1));'",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - mcp.server=chrome-devtools-mcp
+      - mcp.transport=sse
+      - mcp.sse.url=http://localhost:8000/sse
+
+# =============================================================================
+# Red interna común — todos los servicios pueden resolverse por nombre DNS
+# (p. ej. http://chrome-devtools-mcp:8000/sse desde otro contenedor).
+# =============================================================================
+networks:
+  mcp-network:
+    name: mcp-network
+    driver: bridge
+    labels:
+      - mcp.stack=dev-mcps

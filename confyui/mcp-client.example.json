@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "comfy-mcp": {
+      "command": "docker",
+      "args": [
+        "compose",
+        "-f",
+        "C:/RUTA/ABSOLUTA/comfyui-mcp-docker/compose.yaml",
+        "run",
+        "--rm",
+        "-T",
+        "mcp"
+      ]
+    }
+  }
+}

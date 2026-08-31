@@ -1,0 +1,84 @@
+name: comfyui-stack
+
+x-comfy-volumes: &comfy-volumes
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/cache
+    target: /root/.cache
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/config
+    target: /root/.config
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/local
+    target: /root/.local
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/custom_nodes
+    target: /root/ComfyUI/custom_nodes
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/models
+    target: /root/ComfyUI/models
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/input
+    target: /root/ComfyUI/input
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/output
+    target: /root/ComfyUI/output
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/user
+    target: /root/ComfyUI/user
+  - type: bind
+    source: ${COMFYUI_STORAGE:-./storage}/user-scripts
+    target: /root/user-scripts
+
+services:
+  comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        COMFYUI_IMAGE: ${COMFYUI_IMAGE:-yanwk/comfyui-boot:cu130-slim-v2}
+    image: local/comfyui-with-mcp:latest
+    container_name: comfyui
+    restart: unless-stopped
+    ports:
+      - "${COMFYUI_PORT:-8188}:8188"
+    environment:
+      CLI_ARGS: ${COMFYUI_CLI_ARGS:-}
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes: *comfy-volumes
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8188/system_stats', timeout=3).read()"
+      interval: 20s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+
+  # El MCP local oficial usa transporte STDIO, no HTTP.
+  # No se deja corriendo con `docker compose up`; el cliente MCP lo lanza
+  # con: docker compose run --rm -T mcp
+  mcp:
+    image: local/comfyui-with-mcp:latest
+    profiles: ["mcp"]
+    depends_on:
+      comfyui:
+        condition: service_healthy
+    network_mode: "service:comfyui"
+    working_dir: /root/ComfyUI
+    entrypoint: ["comfy-mcp"]
+    environment:
+      COMFY_BIN: /usr/local/bin/comfy
+      COMFY_API_KEY: ${COMFY_API_KEY:-}
+      COMFY_MCP_DEBUG_LOG: /root/ComfyUI/output/comfy-mcp-failures.jsonl
+    volumes: *comfy-volumes
+    stdin_open: true
+    restart: "no"

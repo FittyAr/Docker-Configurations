@@ -1,0 +1,2082 @@
+{
+  "last_node_id": 52,
+  "last_link_id": 78,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        100,
+        100
+      ],
+      "size": [
+        320,
+        100
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "DreamShaper_8_pruned.safetensors"
+      ],
+      "title": "1. Checkpoint Loader (DreamShaper 8)"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        100,
+        260
+      ],
+      "size": [
+        320,
+        310
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "character_side_view.png",
+        "image"
+      ],
+      "title": "2. Input Character (2D Side View)"
+    },
+    {
+      "id": 3,
+      "type": "VAEEncode",
+      "pos": [
+        460,
+        260
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": [],
+      "title": "3. VAE Encode Character"
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [
+        100,
+        620
+      ],
+      "size": [
+        400,
+        180
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "blurry, low quality, deformed anatomy, extra arms, extra legs, front view, 3d render, perspective angle, isometric, noisy background, photographic, realistic shading, watermark, text, artifacts"
+      ],
+      "title": "4. Negative Prompt (Common)"
+    },
+    {
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        100
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 1 CONTACT POSE: left foot forward striking ground with heel, right leg extended backward, left arm backward, right arm forward holding stick, body upright"
+      ],
+      "title": "Pose Prompt - F1_CONTACT"
+    },
+    {
+      "id": 11,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        100
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 5
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 6
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 7
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88101,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F1_CONTACT"
+    },
+    {
+      "id": 12,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        100
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 9
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F1_CONTACT"
+    },
+    {
+      "id": 13,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        100
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 11
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f1_contact"
+      ],
+      "title": "Save Frame - F1_CONTACT"
+    },
+    {
+      "id": 14,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        380
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 2 DOWN RECOIL POSE: left knee flexed and bent absorbing weight, torso lowered slightly, arms in mid-swing, full lateral profile"
+      ],
+      "title": "Pose Prompt - F2_DOWN"
+    },
+    {
+      "id": 15,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        380
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 13
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 14
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 15
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88102,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F2_DOWN"
+    },
+    {
+      "id": 16,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        380
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 17
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F2_DOWN"
+    },
+    {
+      "id": 17,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        380
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f2_down"
+      ],
+      "title": "Save Frame - F2_DOWN"
+    },
+    {
+      "id": 18,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        660
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 3 PASSING POSE: right leg bent swinging forward past left support leg, left leg straight, torso upright, full lateral profile"
+      ],
+      "title": "Pose Prompt - F3_PASSING"
+    },
+    {
+      "id": 19,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        660
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 21
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 22
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 23
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88103,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F3_PASSING"
+    },
+    {
+      "id": 20,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        660
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 25
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F3_PASSING"
+    },
+    {
+      "id": 21,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        660
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 27
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f3_passing"
+      ],
+      "title": "Save Frame - F3_PASSING"
+    },
+    {
+      "id": 22,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        940
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 4 UP HIGH POINT POSE: left foot pushing off ground on toes, body at peak vertical height, right leg reaching forward, full lateral profile"
+      ],
+      "title": "Pose Prompt - F4_UP"
+    },
+    {
+      "id": 23,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        940
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 29
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 30
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 31
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88104,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F4_UP"
+    },
+    {
+      "id": 24,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        940
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 33
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F4_UP"
+    },
+    {
+      "id": 25,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        940
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 35
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f4_up"
+      ],
+      "title": "Save Frame - F4_UP"
+    },
+    {
+      "id": 26,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        1220
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 36
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 5 CONTACT OPPOSITE POSE: right foot forward striking ground with heel, left leg extended backward, arms in opposite swing, full lateral profile"
+      ],
+      "title": "Pose Prompt - F5_CONTACT_OPP"
+    },
+    {
+      "id": 27,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        1220
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 37
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 38
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 39
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 40
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88105,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F5_CONTACT_OPP"
+    },
+    {
+      "id": 28,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        1220
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 41
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F5_CONTACT_OPP"
+    },
+    {
+      "id": 29,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        1220
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 43
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f5_contact_opp"
+      ],
+      "title": "Save Frame - F5_CONTACT_OPP"
+    },
+    {
+      "id": 30,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        1500
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 44
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 6 DOWN RECOIL OPPOSITE POSE: right knee flexed and bent absorbing weight, torso lowered slightly, full lateral profile"
+      ],
+      "title": "Pose Prompt - F6_DOWN_OPP"
+    },
+    {
+      "id": 31,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        1500
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 45
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 46
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 47
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 48
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88106,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F6_DOWN_OPP"
+    },
+    {
+      "id": 32,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        1500
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 49
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 50
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F6_DOWN_OPP"
+    },
+    {
+      "id": 33,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        1500
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 51
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f6_down_opp"
+      ],
+      "title": "Save Frame - F6_DOWN_OPP"
+    },
+    {
+      "id": 34,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        1780
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 52
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 7 PASSING OPPOSITE POSE: left leg bent swinging forward past right support leg, right leg straight, torso upright, full lateral profile"
+      ],
+      "title": "Pose Prompt - F7_PASSING_OPP"
+    },
+    {
+      "id": 35,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        1780
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 53
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 54
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 55
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 56
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88107,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F7_PASSING_OPP"
+    },
+    {
+      "id": 36,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        1780
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 57
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 58
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F7_PASSING_OPP"
+    },
+    {
+      "id": 37,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        1780
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 59
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f7_passing_opp"
+      ],
+      "title": "Save Frame - F7_PASSING_OPP"
+    },
+    {
+      "id": 38,
+      "type": "CLIPTextEncode",
+      "pos": [
+        750,
+        2060
+      ],
+      "size": [
+        350,
+        160
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 60
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 8 UP HIGH POINT OPPOSITE POSE: right foot pushing off ground on toes, body at peak vertical height, left leg reaching forward, seamless loop to frame 1"
+      ],
+      "title": "Pose Prompt - F8_UP_OPP"
+    },
+    {
+      "id": 39,
+      "type": "KSampler",
+      "pos": [
+        1130,
+        2060
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 61
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 62
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 63
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 64
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        88108,
+        "randomize",
+        25,
+        7.0,
+        "euler_ancestral",
+        "karras",
+        0.52
+      ],
+      "title": "KSampler - F8_UP_OPP"
+    },
+    {
+      "id": 40,
+      "type": "VAEDecode",
+      "pos": [
+        1440,
+        2060
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 65
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 66
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "title": "VAE Decode - F8_UP_OPP"
+    },
+    {
+      "id": 41,
+      "type": "SaveImage",
+      "pos": [
+        1670,
+        2060
+      ],
+      "size": [
+        280,
+        260
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 67
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "walk_cycle/f8_up_opp"
+      ],
+      "title": "Save Frame - F8_UP_OPP"
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      1,
+      2,
+      3,
+      1,
+      "VAE"
+    ],
+    [
+      3,
+      1,
+      1,
+      4,
+      0,
+      "CLIP"
+    ],
+    [
+      4,
+      1,
+      1,
+      10,
+      0,
+      "CLIP"
+    ],
+    [
+      5,
+      1,
+      0,
+      11,
+      0,
+      "MODEL"
+    ],
+    [
+      6,
+      10,
+      0,
+      11,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      7,
+      4,
+      0,
+      11,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      8,
+      3,
+      0,
+      11,
+      3,
+      "LATENT"
+    ],
+    [
+      9,
+      11,
+      0,
+      12,
+      0,
+      "LATENT"
+    ],
+    [
+      10,
+      1,
+      2,
+      12,
+      1,
+      "VAE"
+    ],
+    [
+      11,
+      12,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      12,
+      1,
+      1,
+      14,
+      0,
+      "CLIP"
+    ],
+    [
+      13,
+      1,
+      0,
+      15,
+      0,
+      "MODEL"
+    ],
+    [
+      14,
+      14,
+      0,
+      15,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      15,
+      4,
+      0,
+      15,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      16,
+      3,
+      0,
+      15,
+      3,
+      "LATENT"
+    ],
+    [
+      17,
+      15,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      18,
+      1,
+      2,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      19,
+      16,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      1,
+      1,
+      18,
+      0,
+      "CLIP"
+    ],
+    [
+      21,
+      1,
+      0,
+      19,
+      0,
+      "MODEL"
+    ],
+    [
+      22,
+      18,
+      0,
+      19,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      23,
+      4,
+      0,
+      19,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      24,
+      3,
+      0,
+      19,
+      3,
+      "LATENT"
+    ],
+    [
+      25,
+      19,
+      0,
+      20,
+      0,
+      "LATENT"
+    ],
+    [
+      26,
+      1,
+      2,
+      20,
+      1,
+      "VAE"
+    ],
+    [
+      27,
+      20,
+      0,
+      21,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
+      1,
+      1,
+      22,
+      0,
+      "CLIP"
+    ],
+    [
+      29,
+      1,
+      0,
+      23,
+      0,
+      "MODEL"
+    ],
+    [
+      30,
+      22,
+      0,
+      23,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      31,
+      4,
+      0,
+      23,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      32,
+      3,
+      0,
+      23,
+      3,
+      "LATENT"
+    ],
+    [
+      33,
+      23,
+      0,
+      24,
+      0,
+      "LATENT"
+    ],
+    [
+      34,
+      1,
+      2,
+      24,
+      1,
+      "VAE"
+    ],
+    [
+      35,
+      24,
+      0,
+      25,
+      0,
+      "IMAGE"
+    ],
+    [
+      36,
+      1,
+      1,
+      26,
+      0,
+      "CLIP"
+    ],
+    [
+      37,
+      1,
+      0,
+      27,
+      0,
+      "MODEL"
+    ],
+    [
+      38,
+      26,
+      0,
+      27,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      39,
+      4,
+      0,
+      27,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      40,
+      3,
+      0,
+      27,
+      3,
+      "LATENT"
+    ],
+    [
+      41,
+      27,
+      0,
+      28,
+      0,
+      "LATENT"
+    ],
+    [
+      42,
+      1,
+      2,
+      28,
+      1,
+      "VAE"
+    ],
+    [
+      43,
+      28,
+      0,
+      29,
+      0,
+      "IMAGE"
+    ],
+    [
+      44,
+      1,
+      1,
+      30,
+      0,
+      "CLIP"
+    ],
+    [
+      45,
+      1,
+      0,
+      31,
+      0,
+      "MODEL"
+    ],
+    [
+      46,
+      30,
+      0,
+      31,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      47,
+      4,
+      0,
+      31,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      48,
+      3,
+      0,
+      31,
+      3,
+      "LATENT"
+    ],
+    [
+      49,
+      31,
+      0,
+      32,
+      0,
+      "LATENT"
+    ],
+    [
+      50,
+      1,
+      2,
+      32,
+      1,
+      "VAE"
+    ],
+    [
+      51,
+      32,
+      0,
+      33,
+      0,
+      "IMAGE"
+    ],
+    [
+      52,
+      1,
+      1,
+      34,
+      0,
+      "CLIP"
+    ],
+    [
+      53,
+      1,
+      0,
+      35,
+      0,
+      "MODEL"
+    ],
+    [
+      54,
+      34,
+      0,
+      35,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      55,
+      4,
+      0,
+      35,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      56,
+      3,
+      0,
+      35,
+      3,
+      "LATENT"
+    ],
+    [
+      57,
+      35,
+      0,
+      36,
+      0,
+      "LATENT"
+    ],
+    [
+      58,
+      1,
+      2,
+      36,
+      1,
+      "VAE"
+    ],
+    [
+      59,
+      36,
+      0,
+      37,
+      0,
+      "IMAGE"
+    ],
+    [
+      60,
+      1,
+      1,
+      38,
+      0,
+      "CLIP"
+    ],
+    [
+      61,
+      1,
+      0,
+      39,
+      0,
+      "MODEL"
+    ],
+    [
+      62,
+      38,
+      0,
+      39,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      63,
+      4,
+      0,
+      39,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      64,
+      3,
+      0,
+      39,
+      3,
+      "LATENT"
+    ],
+    [
+      65,
+      39,
+      0,
+      40,
+      0,
+      "LATENT"
+    ],
+    [
+      66,
+      1,
+      2,
+      40,
+      1,
+      "VAE"
+    ],
+    [
+      67,
+      40,
+      0,
+      41,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "1. Setup Base: Checkpoint, Character Input & Negative Prompt",
+      "bounding": [
+        80,
+        40,
+        620,
+        800
+      ],
+      "color": "#3f789e",
+      "font_size": 24
+    },
+    {
+      "title": "2. Walk Cycle 8-Frame Animation Loop (Contact -> Down -> Passing -> Up)",
+      "bounding": [
+        730,
+        40,
+        1220,
+        2300
+      ],
+      "color": "#29693b",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

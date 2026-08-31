@@ -1,6 +1,29 @@
 # Docker & Environment
 .env.local
 
+# AI Models, Weights & Cache (Large volumes / persistent data)
+**/models/
+**/hf_cache/
+**/.cache/
+*.gguf
+*.bin
+*.safetensors
+*.pth
+*.pt
+*.onnx
+
+# ComfyUI runtime storage & outputs
+confyui/storage/
+**/storage/
+**/output/
+**/temp/
+
+# Unsloth workspace
+Unsloth/work/
+
+# Cloned source builds
+llama.cpp-turboquant/source/
+
 # Project Zomboid Server Data (Large volumes / persistent data)
 **/data/
 **/server-data/

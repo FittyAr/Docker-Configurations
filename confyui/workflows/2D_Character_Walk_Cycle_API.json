@@ -1,0 +1,625 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "DreamShaper_8_pruned.safetensors"
+    },
+    "_meta": {
+      "title": "1. Checkpoint Loader (DreamShaper 8)"
+    }
+  },
+  "2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "character_side_view.png"
+    },
+    "_meta": {
+      "title": "2. Input Character (2D Side View)"
+    }
+  },
+  "3": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "2",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "3. VAE Encode Character"
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, low quality, deformed anatomy, extra arms, extra legs, front view, 3d render, perspective angle, isometric, noisy background, photographic, realistic shading, watermark, text, artifacts",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "4. Negative Prompt"
+    }
+  },
+  "10": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 1 CONTACT POSE: left foot forward striking ground with heel, right leg extended backward, left arm backward, right arm forward holding stick, body upright",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F1_CONTACT"
+    }
+  },
+  "11": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88101,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F1_CONTACT"
+    }
+  },
+  "12": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F1_CONTACT"
+    }
+  },
+  "13": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f1_contact",
+      "images": [
+        "12",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F1_CONTACT"
+    }
+  },
+  "14": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 2 DOWN RECOIL POSE: left knee flexed and bent absorbing weight, torso lowered slightly, arms in mid-swing, full lateral profile",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F2_DOWN"
+    }
+  },
+  "15": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "14",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88102,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F2_DOWN"
+    }
+  },
+  "16": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "15",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F2_DOWN"
+    }
+  },
+  "17": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f2_down",
+      "images": [
+        "16",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F2_DOWN"
+    }
+  },
+  "18": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 3 PASSING POSE: right leg bent swinging forward past left support leg, left leg straight, torso upright, full lateral profile",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F3_PASSING"
+    }
+  },
+  "19": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "18",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88103,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F3_PASSING"
+    }
+  },
+  "20": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "19",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F3_PASSING"
+    }
+  },
+  "21": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f3_passing",
+      "images": [
+        "20",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F3_PASSING"
+    }
+  },
+  "22": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 4 UP HIGH POINT POSE: left foot pushing off ground on toes, body at peak vertical height, right leg reaching forward, full lateral profile",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F4_UP"
+    }
+  },
+  "23": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "22",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88104,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F4_UP"
+    }
+  },
+  "24": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "23",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F4_UP"
+    }
+  },
+  "25": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f4_up",
+      "images": [
+        "24",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F4_UP"
+    }
+  },
+  "26": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 5 CONTACT OPPOSITE POSE: right foot forward striking ground with heel, left leg extended backward, arms in opposite swing, full lateral profile",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F5_CONTACT_OPP"
+    }
+  },
+  "27": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "26",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88105,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F5_CONTACT_OPP"
+    }
+  },
+  "28": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "27",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F5_CONTACT_OPP"
+    }
+  },
+  "29": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f5_contact_opp",
+      "images": [
+        "28",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F5_CONTACT_OPP"
+    }
+  },
+  "30": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 6 DOWN RECOIL OPPOSITE POSE: right knee flexed and bent absorbing weight, torso lowered slightly, full lateral profile",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F6_DOWN_OPP"
+    }
+  },
+  "31": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "30",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88106,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F6_DOWN_OPP"
+    }
+  },
+  "32": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "31",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F6_DOWN_OPP"
+    }
+  },
+  "33": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f6_down_opp",
+      "images": [
+        "32",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F6_DOWN_OPP"
+    }
+  },
+  "34": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 7 PASSING OPPOSITE POSE: left leg bent swinging forward past right support leg, right leg straight, torso upright, full lateral profile",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F7_PASSING_OPP"
+    }
+  },
+  "35": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "34",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88107,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F7_PASSING_OPP"
+    }
+  },
+  "36": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "35",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F7_PASSING_OPP"
+    }
+  },
+  "37": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f7_passing_opp",
+      "images": [
+        "36",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F7_PASSING_OPP"
+    }
+  },
+  "38": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, 2d game asset, full body lateral profile view, muscular zombie soccer fan, soccer ball texture bald head, light blue and white striped soccer jersey with yellow stripe, yellow drum strapped to belly, holding stick, ripped cargo shorts, comic cel shaded art style, bold outlines, isolated white background, walking animation cycle, FRAME 8 UP HIGH POINT OPPOSITE POSE: right foot pushing off ground on toes, body at peak vertical height, left leg reaching forward, seamless loop to frame 1",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Pose Prompt - F8_UP_OPP"
+    }
+  },
+  "39": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "38",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ],
+      "seed": 88108,
+      "steps": 25,
+      "cfg": 7.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "karras",
+      "denoise": 0.52
+    },
+    "_meta": {
+      "title": "KSampler - F8_UP_OPP"
+    }
+  },
+  "40": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "39",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "VAE Decode - F8_UP_OPP"
+    }
+  },
+  "41": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "walk_cycle/f8_up_opp",
+      "images": [
+        "40",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Save Frame - F8_UP_OPP"
+    }
+  }
+}

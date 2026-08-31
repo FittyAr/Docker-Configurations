@@ -1,0 +1,24 @@
+name: chrome-devtools-mcp-stack
+
+services:
+  chrome-devtools-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chrome-devtools-mcp:latest
+    container_name: chrome-devtools-mcp
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    shm_size: "2gb"
+    environment:
+      - CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS=true
+      - NODE_ENV=production
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'const s = require(\"net\").connect(8000, \"127.0.0.1\", () => { s.destroy(); process.exit(0); }); s.on(\"error\", () => process.exit(1));'"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

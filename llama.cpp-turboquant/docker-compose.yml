@@ -1,0 +1,82 @@
+services:
+  # Gemma 4 26B (Mixture of Experts)
+  gemma-26b:
+    build:
+      context: ./source
+      dockerfile: .devops/cuda.Dockerfile
+      target: server
+    container_name: llama-gemma-26b
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./hf_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      -hf bartowski/gemma-4-26b-it-GGUF:Q4_K_M
+      --port 8080
+      --host 0.0.0.0
+      -ngl 99
+      --cache-type-k q8_0
+      --cache-type-v turbo2
+      -fa on
+      --reasoning on
+
+  # Gemma 4 4B
+  gemma-4b:
+    build:
+      context: ./source
+      dockerfile: .devops/cuda.Dockerfile
+      target: server
+    container_name: llama-gemma-4b
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./hf_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      -hf unsloth/gemma-4-E4B-it-GGUF:Q4_K_M
+      --port 8080
+      --host 0.0.0.0
+      -ngl 99
+      --cache-type-k q8_0
+      --cache-type-v turbo4
+      -fa on
+
+  # Qwen 3.5 9B
+  qwen-9b:
+    build:
+      context: ./source
+      dockerfile: .devops/cuda.Dockerfile
+      target: server
+    container_name: llama-qwen-9b
+    ports:
+      - "8083:8080"
+    volumes:
+      - ./hf_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      -hf bartowski/Qwen_Qwen3.5-9B-GGUF:Q4_K_M
+      --port 8080
+      --host 0.0.0.0
+      -ngl 99
+      --cache-type-k q8_0
+      --cache-type-v turbo3
+      -fa on
